@@ -1,7 +1,6 @@
 import logging
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InputMediaPhoto
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-import random
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -11,17 +10,25 @@ logger = logging.getLogger(__name__)
 
 TOKEN = "7635334895:AAET9udMF3im-hdsxuocP3rpE54xFPbhHxc"
 
+CHERNOBYL_PHOTOS = [
+    "https://assets3.cbsnewsstatic.com/hub/i/r/2019/05/31/534755e0-1f68-4c7e-bae6-e29ab75f6f50/thumbnail/620x608/36df567da8f3e4de5c4bad67bcc4e95e/burning.jpg?v=45a15310810b79948c864f87b07fc8a0",  # Замените на реальные URL
+    "https://assets3.cbsnewsstatic.com/hub/i/r/2019/05/30/82a8b16e-be00-48bb-b6bf-5bc248dc4b71/thumbnail/620x412/ba3b37c1a1c8f4b6d2849d9daa435ef4/gettyimages-57392087.jpg?v=45a15310810b79948c864f87b07fc8a0",
+    "https://assets1.cbsnewsstatic.com/hub/i/r/2019/05/31/42182c3e-ec26-4023-9b0b-874b4bd54f75/thumbnail/620x412/6801702e7ce63dce004d4e10924da579/emtombment.jpg?v=45a15310810b79948c864f87b07fc8a0"
+]
+
+
 def get_keyboard():
     return ReplyKeyboardMarkup(
         [
             [KeyboardButton("💥 Время взрыва"), KeyboardButton("💂 Какие спец юниты использовались")],
             [KeyboardButton("🏙 Исход города"), KeyboardButton("💀 Смерти")],
             [KeyboardButton("🌆 Что происходит сейчас"), KeyboardButton("☢ Уровень радиации")],
-            [KeyboardButton("🎲 Случайное число"), KeyboardButton("🔄 Сброс")],
+            [KeyboardButton("📞 Связь"), KeyboardButton("📸 Фото ЧАЭС")],
             [KeyboardButton("ℹ Помощь")]
         ],
         resize_keyboard=True
     )
+
 
 async def start(update: Update, context: CallbackContext):
     user = update.effective_user
@@ -31,6 +38,7 @@ async def start(update: Update, context: CallbackContext):
         reply_markup=get_keyboard()
     )
 
+
 async def time(update: Update, context: CallbackContext):
     time_blowing = (
         "💥 Авария на Чернобыльской атомной электростанции (ЧАЭС) произошла в ночь с 25 на 26 апреля 1986 года. "
@@ -38,6 +46,7 @@ async def time(update: Update, context: CallbackContext):
         "В 01:23:47 (по московскому времени) на 4-м энергоблоке ЧАЭС произошёл взрыв, который полностью разрушил реактор."
     )
     await update.message.reply_text(time_blowing)
+
 
 async def specop(update: Update, context: CallbackContext):
     spec = (
@@ -61,6 +70,7 @@ async def specop(update: Update, context: CallbackContext):
     )
     await update.message.reply_text(spec)
 
+
 async def exodus(update: Update, context: CallbackContext):
     cities = (
         "🏙 Исход города:\n\n"
@@ -70,6 +80,7 @@ async def exodus(update: Update, context: CallbackContext):
         "Атмосфера заброшенного города вдохновила создателей знаменитой украинской компьютерной игры S.T.A.L.K.E.R."
     )
     await update.message.reply_text(cities)
+
 
 async def deathing(update: Update, context: CallbackContext):
     death = (
@@ -82,6 +93,7 @@ async def deathing(update: Update, context: CallbackContext):
     )
     await update.message.reply_text(death)
 
+
 async def now(update: Update, context: CallbackContext):
     today = (
         "🌆 Текущая ситуация:\n\n"
@@ -90,6 +102,7 @@ async def now(update: Update, context: CallbackContext):
         "Полный вывод из эксплуатации запланирован к 2065 году."
     )
     await update.message.reply_text(today)
+
 
 async def radiation(update: Update, context: CallbackContext):
     rad = (
@@ -100,9 +113,30 @@ async def radiation(update: Update, context: CallbackContext):
     )
     await update.message.reply_text(rad)
 
-async def random_number(update: Update, context: CallbackContext):
-    num = random.randint(1, 100)
-    await update.message.reply_text(f"🎲 Ваше случайное число: {num}")
+
+async def contact(update: Update, context: CallbackContext):
+    await update.message.reply_text(
+        "📞 Связь с разработчиком:\n\n"
+        "По всем вопросам пишите мне в Telegram: @lKiraSl\n\n"
+        "Я отвечу вам как можно скорее!"
+    )
+
+
+async def send_photos(update: Update, context: CallbackContext):
+    try:
+        caption = "📸 Фотографии аварии на Чернобыльской АЭС (26 апреля 1986 года)"
+        await update.message.reply_photo(
+            photo=CHERNOBYL_PHOTOS[0],
+            caption=caption
+        )
+
+        for photo_url in CHERNOBYL_PHOTOS[1:]:
+            await update.message.reply_photo(photo=photo_url)
+
+    except Exception as e:
+        logger.error(f"Ошибка при отправке фотографий: {e}")
+        await update.message.reply_text("⚠ Не удалось загрузить фотографии. Попробуйте позже.")
+
 
 async def help_command(update: Update, context: CallbackContext):
     help_text = (
@@ -113,10 +147,11 @@ async def help_command(update: Update, context: CallbackContext):
         "💀 Смерти - Количество жертв аварии\n"
         "🌆 Что сейчас - Текущее состояние ЧАЭС\n"
         "☢ Радиация - Уровни радиации при взрыве\n"
-        "🎲 Случайное число - Генератор чисел\n"
-        "🔄 Сброс - Перезапустить бота"
+        "📞 Связь - Контакты разработчика\n"
+        "📸 Фото ЧАЭС - Фотографии аварии"
     )
     await update.message.reply_text(help_text)
+
 
 async def handle_message(update: Update, context: CallbackContext):
     text = update.message.text
@@ -133,17 +168,19 @@ async def handle_message(update: Update, context: CallbackContext):
         await now(update, context)
     elif text == "☢ Уровень радиации":
         await radiation(update, context)
-    elif text == "🎲 Случайное число":
-        await random_number(update, context)
-    elif text == "🔄 Сброс":
-        await start(update, context)
+    elif text == "📞 Связь":
+        await contact(update, context)
+    elif text == "📸 Фото ЧАЭС":
+        await send_photos(update, context)
     elif text == "ℹ Помощь":
         await help_command(update, context)
     else:
         await update.message.reply_text("Используйте кнопки для навигации", reply_markup=get_keyboard())
 
+
 async def error_handler(update: object, context: CallbackContext):
     logger.error("Exception while handling an update:", exc_info=context.error)
+
 
 def main():
     application = Application.builder().token(TOKEN).build()
@@ -155,6 +192,7 @@ def main():
     application.add_error_handler(error_handler)
 
     application.run_polling()
+
 
 if __name__ == '__main__':
     main()
