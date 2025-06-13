@@ -9,8 +9,10 @@ names = [
 
 print("Имена, начинающиеся на 'А':")
 for name in names:
-    if name.startswith('А') or name.startswith('A'):  # Проверяем и на русскую, и на английскую "A"
+    if name.startswith('А') or name.startswith('A'):  
         print(name)
+
+
 
 2 скрипт
 
@@ -48,17 +50,6 @@ else:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 3 скрипт
 
 class Task:
@@ -88,6 +79,8 @@ for task in tasks[1:]:  # Проверяем остальные занятия
 print("Занятие, которое заканчивается позже всех:")
 print(latest_task)
 
+
+
 4 скрпит 
 
 sequence = list(map(int, input().split()))
@@ -98,6 +91,8 @@ last_negative = next((x for x in reversed(sequence) if x < 0), None)
 
 print(f"Первый положительный: {first_positive}")
 print(f"Последний отрицательный: {last_negative}")
+
+
 
 5 скрпит
 
